@@ -1,6 +1,6 @@
 (function () {
   const CONFIG = {
-    groqKey: 'PLAK_HIER_JE_GROQ_KEY',
+    groqKey: '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',
     bedrijfsnaam: 'Roel Willemsen Garantiemakelaars',
     kleurPrimair: '#1a5c3a',
     kleurAccent: '#f5c800',
