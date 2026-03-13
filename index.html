@@ -41,40 +41,41 @@
 
   .divider { text-align:center; color:#b5b0a5; font-size:12px; margin:6px 0 10px; letter-spacing:0.5px; }
 
+  /* Lead badge — verschijnt als lead binnenkomt */
+  .lead-badge {
+    display:none;
+    background:#dcfce7;
+    border:1px solid #86efac;
+    border-radius:12px;
+    padding:14px 18px;
+    margin-bottom:14px;
+    font-size:13px;
+    color:#166534;
+    font-weight:500;
+    align-items:center;
+    gap:10px;
+  }
+  .lead-badge.zichtbaar { display:flex; animation:fadeIn .4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
   .cta { background:var(--groen); border-radius:16px; padding:24px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; box-shadow:0 4px 20px rgba(26,92,58,0.2); }
   .cta-text h3 { color:white; font-size:16px; font-weight:700; margin-bottom:4px; }
   .cta-text p { color:rgba(255,255,255,0.6); font-size:13px; }
   .cta-btn { background:var(--geel); color:#0f3d26; border:none; padding:11px 22px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; }
   .cta-btn:hover { background:#e6bb00; }
 
-  /* HINT — vast boven de chatknop */
   .hint {
-    position:fixed;
-    bottom:32px;
-    right:96px;
-    background:var(--groen);
-    color:white;
-    padding:8px 14px;
-    border-radius:100px;
-    font-size:13px;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    gap:6px;
+    position:fixed; bottom:32px; right:96px;
+    background:var(--groen); color:white;
+    padding:8px 14px; border-radius:100px;
+    font-size:13px; font-weight:600;
+    display:flex; align-items:center; gap:6px;
     animation:float 2s ease-in-out infinite;
     pointer-events:none;
     box-shadow:0 4px 16px rgba(26,92,58,0.3);
     white-space:nowrap;
   }
-  .hint::after {
-    content:'';
-    position:absolute;
-    right:-7px;
-    top:50%;
-    transform:translateY(-50%);
-    border:5px solid transparent;
-    border-left-color:var(--groen);
-  }
+  .hint::after { content:''; position:absolute; right:-7px; top:50%; transform:translateY(-50%); border:5px solid transparent; border-left-color:var(--groen); }
   .hint-dot { width:8px; height:8px; background:#22c55e; border-radius:50%; animation:pulse 2s infinite; flex-shrink:0; }
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
 
@@ -102,6 +103,15 @@
 </div>
 
 <div class="main">
+
+  <!-- Lead notificatie — wordt zichtbaar zodra een lead binnenkomt -->
+  <div class="lead-badge" id="leadBadge">
+    <span style="font-size:20px">🎉</span>
+    <div>
+      <strong>Nieuwe lead ontvangen!</strong><br>
+      Gegevens zijn via WhatsApp doorgestuurd naar het team.
+    </div>
+  </div>
 
   <div class="section">
     <div class="section-header"><h2>🏡 Huis verkopen</h2></div>
@@ -138,7 +148,7 @@
   <div class="cta">
     <div class="cta-text">
       <h3>Wil jij ook zo'n AI-assistent?</h3>
-      <p>Launchly.nl bouwt dit voor jouw bedrijf — binnen 1 week live.</p>
+      <p>Briqk.nl bouwt dit voor jouw bedrijf — binnen 1 week live.</p>
     </div>
     <button class="cta-btn" onclick="openChat('Ik wil meer weten over de AI-assistent voor mijn bedrijf')">Meer info →</button>
   </div>
@@ -147,7 +157,9 @@
 
 <div class="hint" id="hint"><span class="hint-dot"></span>Probeer de chatbot!</div>
 
+<!-- Chatbot widget (key zit in /api/chat via Vercel env var) -->
 <script src="/roelwillemsen.js"></script>
+
 <script>
   function openChat(vraag) {
     const win = document.getElementById('lnch-window');
@@ -158,6 +170,8 @@
       if (input) { input.value = vraag; window.__lnchSend(); }
     }, 350);
   }
+
+  // Hint weghalen zodra chatbot geopend wordt
   setTimeout(() => {
     const toggle = document.getElementById('lnch-toggle');
     if (toggle) toggle.addEventListener('click', () => {
@@ -165,6 +179,12 @@
       if (h) h.style.display = 'none';
     });
   }, 600);
+
+  // Luister naar lead event vanuit roelwillemsen.js
+  // (wordt gefired via window.dispatchEvent in de widget)
+  window.addEventListener('briqk-lead', () => {
+    document.getElementById('leadBadge').classList.add('zichtbaar');
+  });
 </script>
 
 </body>
