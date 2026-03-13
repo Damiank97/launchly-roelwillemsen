@@ -201,28 +201,31 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
     const b = (botAntwoord  || '').toLowerCase();
 
     // Tijdens lead flow: geen opties
-    if (b.includes('mag ik je naam') || b.includes('telefoonnummer')) return null;
+    if (b.includes('mag ik je naam') || b.includes('telefoonnummer') || b.includes('e-mailadres')) return null;
 
-    // Optie-sets per context
-    if (u.includes('verkoop') || u.includes('verkopen') || b.includes('verkop'))
-      return ['Afspraak inplannen', 'Wat kost het?', 'Hoe lang duurt het?'];
+    // Bepaal huidig onderwerp — toon andere opties
+    if (u.includes('verkoop') || u.includes('verkopen') || b.includes('no cure') || b.includes('courtage'))
+      return ['Gratis waardebepaling', 'Afspraak inplannen', 'Hoe lang duurt het?'];
 
     if (u.includes('taxatie') || b.includes('taxatie'))
-      return ['Taxatie aanvragen', 'Wat kost een taxatie?', 'Gratis waardebepaling'];
-
-    if (u.includes('koop') || u.includes('kopen') || u.includes('aankoop'))
-      return ['Aankoopbegeleiding', 'Werkgebied bekijken', 'Afspraak inplannen'];
+      return ['Gratis waardebepaling', 'Afspraak inplannen', 'Huis verkopen'];
 
     if (u.includes('waardebepaling') || b.includes('waardebepaling'))
-      return ['Waardebepaling aanvragen', 'Verschil met taxatie?', 'Afspraak inplannen'];
+      return ['Huis verkopen', 'Afspraak inplannen', 'Taxatie aanvragen'];
 
-    if (u.includes('courtage') || u.includes('kost') || b.includes('courtage'))
-      return ['Afspraak inplannen', 'Gratis waardebepaling', 'Hoe lang duurt verkoop?'];
+    if (u.includes('koop') || u.includes('aankoop') || b.includes('aankoop'))
+      return ['Huis verkopen', 'Gratis waardebepaling', 'Afspraak inplannen'];
+
+    if (u.includes('courtage') || u.includes('kost') || b.includes('1-1,5'))
+      return ['Afspraak inplannen', 'Gratis waardebepaling', 'Hoe lang duurt het?'];
+
+    if (u.includes('afspraak') || b.includes('afspraak'))
+      return ['Huis verkopen', 'Gratis waardebepaling', 'Taxatie aanvragen'];
 
     if (u.includes('werkgebied') || u.includes('arnhem') || u.includes('velp'))
-      return ['Afspraak inplannen', 'Huis verkopen', 'Gratis waardebepaling'];
+      return ['Huis verkopen', 'Afspraak inplannen', 'Gratis waardebepaling'];
 
-    // Default na elk bot-bericht
+    // Default
     return ['Huis verkopen', 'Huis kopen', 'Gratis waardebepaling'];
   }
 
@@ -309,6 +312,10 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
   async function __lnchSend() {
     const msg = inp.value.trim();
     if (!msg || busy) return;
+
+    // Verwijder huidige opties meteen bij versturen
+    const oudOpties = msgs.querySelector('.lnch-opties');
+    if (oudOpties) oudOpties.remove();
 
     voegBerichtToe(msg, 'user');
     inp.value = '';
