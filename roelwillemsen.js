@@ -25,51 +25,53 @@ BEDRIJFSINFO:
 - Openingstijden: ma-vr 09:00-17:00 | NVM Garantiemakelaar | 45+ jaar | 9.2/10 op Funda
 
 DIENSTEN:
-- Huis verkopen: No Cure = No Pay, courtage ~1-1,5%
+- Huis verkopen: No Cure = No Pay, courtage ~1-1,5%, gemiddeld 4-8 weken
 - Gratis waardebepaling: kosteloos en vrijblijvend
-- Taxatie: 350-600 euro, erkend taxateur
+- Taxatie: €350-600, erkend taxateur
 - Aankoop begeleiding, bouwtechnische keuring
 - Werkgebied: Arnhem, Velp, Arnhem-Zuid, Elst, Zevenaar
 
-OPMAAKREGELS — VERPLICHT:
+OPMAAKREGELS — STRIKT VERPLICHT:
 1. Maximaal 2 zinnen per antwoord. Nooit langer.
-2. Geen opsommingen of bulletpoints.
-3. Altijd slechts 1 vraag per bericht — nooit meerdere vragen tegelijk.
-4. Buiten de lead flow: eindig met [OPTIES:] tag (zie onder).
+2. Sluit je antwoord NOOIT af met een vraag — de interface heeft knoppen daarvoor.
+3. Geen opsommingen of bulletpoints.
+4. Buiten lead flow: eindig met [OPTIES:] tag op de allerlaatste regel.
 
 OPTIES TAG (buiten lead flow):
-Formaat: [OPTIES: Knop 1 | Knop 2 | Knop 3] — altijd op de allerlaatste regel.
+[OPTIES: Knop 1 | Knop 2 | Knop 3] — max 3, max 4 woorden per knop.
+Kies altijd opties die ANDERS zijn dan het huidige onderwerp.
 Voorbeelden:
-- Algemeen: [OPTIES: Huis verkopen | Huis kopen | Gratis waardebepaling]
-- Na uitleg verkopen: [OPTIES: Afspraak inplannen | Wat kost het? | Hoe lang duurt het?]
-- Na uitleg taxatie: [OPTIES: Taxatie aanvragen | Gratis waardebepaling | Meer info]
+- Na uitleg verkopen: [OPTIES: Afspraak inplannen | Gratis waardebepaling | Hoe lang duurt het?]
+- Na uitleg taxatie: [OPTIES: Huis verkopen | Afspraak inplannen | Huis kopen]
+- Na uitleg waardebepaling: [OPTIES: Huis verkopen | Taxatie aanvragen | Afspraak inplannen]
+- Na uitleg aankoop: [OPTIES: Huis verkopen | Gratis waardebepaling | Afspraak inplannen]
 
-LEAD FLOW — verplicht na 2-3 beantwoorde vragen van de bezoeker:
-Tel het aantal vragen dat de bezoeker heeft gesteld. Na 2 à 3 vragen ga je over naar de lead flow, ook als de bezoeker niet zelf om contact vraagt.
+LEAD FLOW — verplicht na precies 2 berichten van de bezoeker:
+Tel het aantal berichten dat de bezoeker heeft gestuurd. Na het 2e bericht ga je ALTIJD over naar de lead flow, ongeacht het onderwerp.
 
-Stap 1 — vraag naam:
-"Om je nog beter te kunnen helpen, mag ik je naam weten?"
+Stap 1 — vraag naam (na 2e bericht bezoeker):
+"Om je nog beter te helpen, mag ik je naam weten?"
 
 Stap 2 — zodra je de naam hebt, vraag telefoonnummer:
 "Fijn, [naam]! Wat is je telefoonnummer zodat we je persoonlijk kunnen terugbellen?"
 
-Stap 3a — als bezoeker geen nummer wil geven, vraag e-mailadres:
-"Geen probleem! Mag ik dan je e-mailadres, zodat we je via de mail kunnen bereiken?"
+Stap 3a — als bezoeker geen nummer wil geven, vraag e-mail:
+"Geen probleem! Mag ik dan je e-mailadres?"
 
-Stap 3b — als bezoeker ook geen e-mail wil geven:
-"Dat begrijp ik. U kunt ons zelf bereiken via 026-3274455 of info@roelwillemsen.nl — we helpen u graag!"
-Zet daarna GEEN lead tag.
+Stap 3b — als bezoeker ook geen e-mail wil:
+"Dat begrijp ik. Bel ons gerust zelf op 026-3274455 of mail naar info@roelwillemsen.nl."
 
-Stap 4 — zodra je naam + telefoon OF naam + e-mail hebt, sluit af:
-"Top [naam], ik heb alles voor je klaarstaan! Klik op de knop hieronder om ons te bereiken. 😊"
+Stap 4 — zodra naam + telefoon of naam + email ontvangen, sluit af:
+"Top [naam], ik heb alles voor je klaarstaan! Klik op de knop hieronder om contact op te nemen. 😊"
 Zet dan EXACT op de allerlaatste regel:
 [LEAD|naam=ECHTENAAM|tel=ECHTETEL|interesse=KORTE_OMSCHRIJVING]
-(als geen telefoon maar wel email: vul tel in met het e-mailadres)
+(geen telefoon maar wel email: gebruik e-mailadres als waarde voor tel)
 
-REGELS LEAD FLOW:
-- Nooit naam/tel/email als placeholder invullen — alleen echte waarden
+REGELS:
+- Nooit placeholders invullen — alleen echte waarden van de bezoeker
 - Altijd 1 vraag per bericht
 - Tijdens lead flow: geen [OPTIES:] tag
+- NOOIT zelf een vraag stellen buiten de lead flow
 
 TAAL: Altijd Nederlands. Vriendelijk en warm.`
   };
@@ -183,7 +185,9 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
   }
 
   function detecteerLead(tekst) {
-    const m = tekst.match(/\[LEAD\|naam=([^|]+)\|tel=([^|]+)\|interesse=([^\]]+)\]/i);
+    // Normaliseer: verwijder whitespace rondom | en =
+    const genorm = tekst.replace(/\s*\|\s*/g, '|').replace(/\s*=\s*/g, '=');
+    const m = genorm.match(/\[LEAD\|naam=([^|]+)\|tel=([^|]+)\|interesse=([^\]]+)\]/i);
     return m ? { naam: m[1].trim(), tel: m[2].trim(), interesse: m[3].trim() } : null;
   }
 
@@ -201,32 +205,35 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
     const b = (botAntwoord  || '').toLowerCase();
 
     // Tijdens lead flow: geen opties
-    if (b.includes('mag ik je naam') || b.includes('telefoonnummer') || b.includes('e-mailadres')) return null;
+    if (b.includes('mag ik je naam') || b.includes('telefoonnummer') || b.includes('e-mailadres') || b.includes('klaarstaan')) return null;
 
-    // Bepaal huidig onderwerp — toon andere opties
-    if (u.includes('verkoop') || u.includes('verkopen') || b.includes('no cure') || b.includes('courtage'))
-      return ['Gratis waardebepaling', 'Afspraak inplannen', 'Hoe lang duurt het?'];
+    // Bepaal alle onderwerpen in de volledige geschiedenis
+    const gesproken = historie.map(h => h.content.toLowerCase()).join(' ');
+    const heeftVerkopen    = gesproken.includes('verkoop') || gesproken.includes('courtage') || u.includes('verkoop');
+    const heeftKopen       = gesproken.includes('koop') || gesproken.includes('aankoop') || u.includes('koop');
+    const heeftWaardebep   = gesproken.includes('waardebepaling') || u.includes('waardebepaling');
+    const heeftTaxatie     = gesproken.includes('taxatie') || u.includes('taxatie');
+    const heeftAfspraak    = gesproken.includes('afspraak') || u.includes('afspraak');
 
-    if (u.includes('taxatie') || b.includes('taxatie'))
-      return ['Gratis waardebepaling', 'Afspraak inplannen', 'Huis verkopen'];
+    // Bouw lijst van NIET-besproken opties
+    const beschikbaar = [];
+    if (!heeftVerkopen)  beschikbaar.push('Huis verkopen');
+    if (!heeftKopen)     beschikbaar.push('Huis kopen');
+    if (!heeftWaardebep) beschikbaar.push('Gratis waardebepaling');
+    if (!heeftTaxatie)   beschikbaar.push('Taxatie aanvragen');
+    if (!heeftAfspraak)  beschikbaar.push('Afspraak inplannen');
 
-    if (u.includes('waardebepaling') || b.includes('waardebepaling'))
-      return ['Huis verkopen', 'Afspraak inplannen', 'Taxatie aanvragen'];
+    // Altijd "Afspraak inplannen" als laatste fallback tonen
+    if (beschikbaar.length === 0) return ['Afspraak inplannen', 'Bel ons: 026-3274455', 'Stuur een e-mail'];
 
-    if (u.includes('koop') || u.includes('aankoop') || b.includes('aankoop'))
-      return ['Huis verkopen', 'Gratis waardebepaling', 'Afspraak inplannen'];
-
-    if (u.includes('courtage') || u.includes('kost') || b.includes('1-1,5'))
-      return ['Afspraak inplannen', 'Gratis waardebepaling', 'Hoe lang duurt het?'];
-
-    if (u.includes('afspraak') || b.includes('afspraak'))
-      return ['Huis verkopen', 'Gratis waardebepaling', 'Taxatie aanvragen'];
-
-    if (u.includes('werkgebied') || u.includes('arnhem') || u.includes('velp'))
-      return ['Huis verkopen', 'Afspraak inplannen', 'Gratis waardebepaling'];
-
-    // Default
-    return ['Huis verkopen', 'Huis kopen', 'Gratis waardebepaling'];
+    // Vul aan tot 3 opties
+    const alle = ['Huis verkopen','Huis kopen','Gratis waardebepaling','Taxatie aanvragen','Afspraak inplannen'];
+    while (beschikbaar.length < 3) {
+      const extra = alle.find(o => !beschikbaar.includes(o));
+      if (!extra) break;
+      beschikbaar.push(extra);
+    }
+    return beschikbaar.slice(0, 3);
   }
 
   function toonOpties(opties) {
@@ -302,7 +309,7 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
       </a>
       <div class="wa-card-footer">${emailVerstuurd ? '📧 Bevestiging verstuurd · Reactie binnen 1 werkdag' : '💬 Of bel ons op 026-3274455'}</div>`;
 
-    win.insertBefore(card, document.querySelector('.lnch-ir'));
+    win.insertBefore(card, win.querySelector('.lnch-ir'));
     msgs.scrollTop = msgs.scrollHeight;
 
     // Stuur event naar pagina voor badge update
@@ -344,6 +351,9 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
         ? (data.choices?.[0]?.message?.content || 'Bel ons even op 026-3274455.')
         : 'Er ging iets mis. Bel ons op 026-3274455.';
 
+      console.log('[Briqk debug] raw:', rawAntwoord);
+      console.log('[Briqk debug] lead detected:', detecteerLead(rawAntwoord));
+
       const lead = detecteerLead(rawAntwoord);
       let zichtbaar = verwijderLeadTag(rawAntwoord);
       zichtbaar = verwijderOptiesTag(zichtbaar);
@@ -352,7 +362,7 @@ TAAL: Altijd Nederlands. Vriendelijk en warm.`
       historie.push({ role: 'assistant', content: rawAntwoord });
 
       if (lead) {
-        setTimeout(() => toonWhatsAppCard(lead), 500);
+        setTimeout(() => toonLeadCard(lead), 500);
       } else {
         const opties = kiesOpties(msg, zichtbaar);
         setTimeout(() => toonOpties(opties), 400);
